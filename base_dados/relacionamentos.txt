@@ -1,0 +1,36 @@
+CLIENTE
+-------
+
+Cliente( Cod_log_compra) - Endereco (Codlog)
+Cliente( Cod_log_entrega) - Endereco (Codlog)
+Cliente (grupoNr) - Grupo (GrupoNr)
+
+TRANSPORTADORA
+--------------
+Fornecedor( Cod_log_compra) - Endereco (Codlog)
+Fornecedor( CodlogE) - Endereco (Codlog)
+Fornecedor (grupoNr) - Grupo (GrupoNr)
+
+ENDERECO
+--------
+Endereco (Municipio_numero) - Municipio (Municipio_numero)
+
+UF
+--
+Municipio (Pais / UF) - UF (Pais / UF)
+
+PRODUTO
+-------
+Produto (FamiliaNr) - Familia (FamiliaNr)
+Produto (LinhaNr) - Linha (LinhaNr)
+
+PEDIDOVENDA
+-----------
+PedidoVenda (OperacaoNr) - Operacao (OperacaoNr)
+PedidoVenda (UsoNr) - Uso (UsoNr)
+
+PEDIDOVENDAITEM
+---------------
+PedidoVItem (Serie + PedidoNr) - PedidoVenda (Serie + PedidoNr)
+PedidoVItem (ProdutoNr) - Produto (ProdutoNr)
+
