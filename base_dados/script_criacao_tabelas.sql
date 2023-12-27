@@ -8,12 +8,12 @@ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
 -- -----------------------------------------------------
--- Schema mydb
+-- Schema polimero
 -- -----------------------------------------------------
 DROP SCHEMA IF EXISTS `polimero` ;
 
 -- -----------------------------------------------------
--- Schema mydb
+-- Schema polimero
 -- -----------------------------------------------------
 CREATE SCHEMA IF NOT EXISTS `polimeros` DEFAULT CHARACTER SET utf8 ;
 USE `polimero` ;
@@ -253,7 +253,7 @@ DROP TABLE IF EXISTS `polimero`.`PedidoVendaItem` ;
 
 CREATE TABLE IF NOT EXISTS `polimero`.`PedidoVendaItem` (
   `Serie` INT NOT NULL,
-  `Pedido_numero` DECIMAL(21,6) NOT NULL,
+  `Pedido_numero` INT NOT NULL,
   `Qtde` INT NULL,
   `Preco_venda` DECIMAL(21,6) NULL,
   `Peso_liquido` DECIMAL(21,6) NULL,
@@ -273,6 +273,80 @@ CREATE TABLE IF NOT EXISTS `polimero`.`PedidoVendaItem` (
 ENGINE = InnoDB;
 
 
+-- -- -----------------------------------------------------
+-- -- Table `polimero`.`PedidoVenda`
+-- -- -----------------------------------------------------
+-- DROP TABLE IF EXISTS `polimero`.`PedidoVenda` ;
+
+-- CREATE TABLE IF NOT EXISTS `polimero`.`PedidoVenda` (
+--   `Serie` INT NOT NULL,
+--   `Pedido_Numero` DECIMAL(21,6) NOT NULL,
+--   `Ordem_venda` VARCHAR(60) NOT NULL,
+--   `Emitido_em` DATE NOT NULL,
+--   `Previsao_entrega` DATE NOT NULL,
+--   `Pedido_cliente` VARCHAR(45) NOT NULL COMMENT 'Ordem de compra emitida pelo cliente',
+--   `DT_embarque` DATE NOT NULL,
+--   `DT_entregue` DATE NOT NULL,
+--   `Ordem_embarque` VARCHAR(45) NULL COMMENT 'Número da ordem de embarque',
+--   `Transporte` VARCHAR(60) NULL,
+--   `Volume` INT NULL,
+--   `Especie` VARCHAR(60) NULL,
+--   `Valor_mercadoria` DECIMAL(21,6) NULL,
+--   `Frete` DECIMAL(21,6) NULL,
+--   `Seguro` DECIMAL(21,6) NULL,
+--   `Acrescimos` DECIMAL(21,6) NULL,
+--   `Peso_liquido` DECIMAL(21,6) NULL,
+--   `Peso_bruto` DECIMAL(21,6) NULL,
+--   `Cliente_numero` INT NOT NULL,
+--   `Operacao_numero` INT NOT NULL,
+--   `Uso_numero` INT NOT NULL,
+--   `Transportadora_numero` INT NOT NULL,
+--   `Cod_log_entrega` INT NOT NULL,
+--   `OnTime` INT NULL COMMENT 'Pedido entregue no prazo',
+--   `InFull` INT NULL COMMENT 'Pedido entregue inteiro',
+--   `OnTime_InFull` INT NULL COMMENT 'Pedido entregue inteiro e no prazo',
+--   `PedidoVendaItem_Serie` INT NOT NULL,
+--   `PedidoVendaItem_Pedido_numero` DECIMAL(21,6) NOT NULL,
+--   PRIMARY KEY (`Serie`, `Pedido_Numero`, `Cliente_numero`, `Operacao_numero`, `Uso_numero`, `Transportadora_numero`, `Cod_log_entrega`, `PedidoVendaItem_Serie`, `PedidoVendaItem_Pedido_numero`),
+--   INDEX `fk_PedidoVenda_Cliente1_idx` (`Cliente_numero` ASC) VISIBLE,
+--   INDEX `fk_PedidoVenda_Operacao1_idx` (`Operacao_numero` ASC) VISIBLE,
+--   INDEX `fk_PedidoVenda_Uso1_idx` (`Uso_numero` ASC) VISIBLE,
+--   INDEX `fk_PedidoVenda_Transportadora1_idx` (`Transportadora_numero` ASC) VISIBLE,
+--   INDEX `fk_PedidoVenda_Endereco1_idx` (`Cod_log_entrega` ASC) VISIBLE,
+--   INDEX `fk_PedidoVenda_PedidoVendaItem1_idx` (`PedidoVendaItem_Serie` ASC, `PedidoVendaItem_Pedido_numero` ASC) VISIBLE,
+--   CONSTRAINT `fk_PedidoVenda_Cliente1`
+--     FOREIGN KEY (`Cliente_numero`)
+--     REFERENCES `polimero`.`Cliente` (`Cliente_numero`)
+--     ON DELETE NO ACTION
+--     ON UPDATE NO ACTION,
+--   CONSTRAINT `fk_PedidoVenda_Operacao1`
+--     FOREIGN KEY (`Operacao_numero`)
+--     REFERENCES `polimero`.`Operacao` (`Operacao_numero`)
+--     ON DELETE NO ACTION
+--     ON UPDATE NO ACTION,
+--   CONSTRAINT `fk_PedidoVenda_Uso1`
+--     FOREIGN KEY (`Uso_numero`)
+--     REFERENCES `polimero`.`Uso` (`Uso_numero`)
+--     ON DELETE NO ACTION
+--     ON UPDATE NO ACTION,
+--   CONSTRAINT `fk_PedidoVenda_Transportadora1`
+--     FOREIGN KEY (`Transportadora_numero`)
+--     REFERENCES `polimero`.`Transportadora` (`Transportadora_numero`)
+--     ON DELETE NO ACTION
+--     ON UPDATE NO ACTION,
+--   CONSTRAINT `fk_PedidoVenda_Endereco1`
+--     FOREIGN KEY (`Cod_log_entrega`)
+--     REFERENCES `polimero`.`Endereco` (`Cod_log`)
+--     ON DELETE NO ACTION
+--     ON UPDATE NO ACTION,
+--   CONSTRAINT `fk_PedidoVenda_PedidoVendaItem1`
+--     FOREIGN KEY (`PedidoVendaItem_Serie` , `PedidoVendaItem_Pedido_numero`)
+--     REFERENCES `polimero`.`PedidoVendaItem` (`Serie` , `Pedido_numero`)
+--     ON DELETE NO ACTION
+--     ON UPDATE NO ACTION)
+-- ENGINE = InnoDB;
+
+
 -- -----------------------------------------------------
 -- Table `polimero`.`PedidoVenda`
 -- -----------------------------------------------------
@@ -280,7 +354,7 @@ DROP TABLE IF EXISTS `polimero`.`PedidoVenda` ;
 
 CREATE TABLE IF NOT EXISTS `polimero`.`PedidoVenda` (
   `Serie` INT NOT NULL,
-  `Pedido_Numero` DECIMAL(21,6) NOT NULL,
+  `Pedido_numero` INT NOT NULL,
   `Ordem_venda` VARCHAR(60) NOT NULL,
   `Emitido_em` DATE NOT NULL,
   `Previsao_entrega` DATE NOT NULL,
@@ -305,15 +379,13 @@ CREATE TABLE IF NOT EXISTS `polimero`.`PedidoVenda` (
   `OnTime` INT NULL COMMENT 'Pedido entregue no prazo',
   `InFull` INT NULL COMMENT 'Pedido entregue inteiro',
   `OnTime_InFull` INT NULL COMMENT 'Pedido entregue inteiro e no prazo',
-  `PedidoVendaItem_Serie` INT NOT NULL,
-  `PedidoVendaItem_Pedido_numero` DECIMAL(21,6) NOT NULL,
-  PRIMARY KEY (`Serie`, `Pedido_Numero`, `Cliente_numero`, `Operacao_numero`, `Uso_numero`, `Transportadora_numero`, `Cod_log_entrega`, `PedidoVendaItem_Serie`, `PedidoVendaItem_Pedido_numero`),
+  PRIMARY KEY (`Serie`, `Pedido_numero`, `Cliente_numero`, `Operacao_numero`, `Uso_numero`, `Transportadora_numero`, `Cod_log_entrega`),
   INDEX `fk_PedidoVenda_Cliente1_idx` (`Cliente_numero` ASC) VISIBLE,
   INDEX `fk_PedidoVenda_Operacao1_idx` (`Operacao_numero` ASC) VISIBLE,
   INDEX `fk_PedidoVenda_Uso1_idx` (`Uso_numero` ASC) VISIBLE,
   INDEX `fk_PedidoVenda_Transportadora1_idx` (`Transportadora_numero` ASC) VISIBLE,
   INDEX `fk_PedidoVenda_Endereco1_idx` (`Cod_log_entrega` ASC) VISIBLE,
-  INDEX `fk_PedidoVenda_PedidoVendaItem1_idx` (`PedidoVendaItem_Serie` ASC, `PedidoVendaItem_Pedido_numero` ASC) VISIBLE,
+  INDEX `fk_PedidoVenda_PedidoVendaItem1_idx` (`Serie` ASC, `Pedido_numero` ASC) VISIBLE,
   CONSTRAINT `fk_PedidoVenda_Cliente1`
     FOREIGN KEY (`Cliente_numero`)
     REFERENCES `polimero`.`Cliente` (`Cliente_numero`)
@@ -340,12 +412,11 @@ CREATE TABLE IF NOT EXISTS `polimero`.`PedidoVenda` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_PedidoVenda_PedidoVendaItem1`
-    FOREIGN KEY (`PedidoVendaItem_Serie` , `PedidoVendaItem_Pedido_numero`)
+    FOREIGN KEY (`Serie` , `Pedido_numero`)
     REFERENCES `polimero`.`PedidoVendaItem` (`Serie` , `Pedido_numero`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
-
 
 
 -- -----------------------------------------------------
@@ -355,7 +426,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `polimero`.`log`;
 
 CREATE TABLE IF NOT EXISTS `polimero`.`log`(
-    id int,
+    id int AUTO_INCREMENT,
     dt_registro date,
     user varchar(30),
     tipo_acao varchar(10),
@@ -364,6 +435,9 @@ CREATE TABLE IF NOT EXISTS `polimero`.`log`(
 )
 ENGINE = InnoDB;
 
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+ALTER TABLE log ADD CONSTRAINT log_pk PRIMARY KEY (id);
