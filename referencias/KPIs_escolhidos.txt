@@ -1,0 +1,5 @@
+1-Tempo de entrega: Tempo decorrido da saída do armazém até a chegada no cliente em dias
+2-Tempo de ciclo do pedido: Tempo decorrido desde a  efetivação da compra até a entrega em dias
+3-On Time In Full (OTIF - Pedidos Completos e no Prazo): Número de pedidos recebidos pelo cliente no prazo e quantidades acordadas / número total de pedidos, em porcentagem.
+4-On time delivery (OTD): Número de pedidos entregues ao cliente no prazo acordado / número total de pedidos, em porcentagem.
+5-Order Fill Rate:  Número de pedidos atendidos completamente / Número total de pedidos, em porcentagem 
