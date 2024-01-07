@@ -1,0 +1,7 @@
+Data Architecture: https://www.ibm.com/br-pt/topics/data-architecture
+
+O que é Arquitetura de Dados: https://blog.dsacademy.com.br/o-que-e-arquitetura-de-dados/
+
+Diagrama de Arquitetura de Dados: Um Tutorial Completo: https://www.edrawsoft.com/pt/article/data-architecture-diagram.html
+
+Exemplo de Documento: https://github.com/fga-eps-mds/2018.2-Lino/blob/master/docs/documento-de-arquitetura.md
