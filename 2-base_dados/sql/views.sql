@@ -258,3 +258,64 @@ ALTER VIEW ticket_medio_pedido AS
         ,uf.uf
         ,Mes_Entregue;
 	-- ORDER BY MONTH(Mes_Entregue);
+
+-- Info gerais : Para PowerBI e analises notebook
+ALTER VIEW info_gerais AS
+	SELECT
+		pv.pedido_numero as 'Pedido Numero'
+		,cli.cliente as Cliente
+		,prd.nome as Produto
+        ,opr.Nome as Operacao
+        ,uso.uso as Uso
+        ,fam.nome as Familia
+        ,linha.nome as Linha
+        ,pv.ordem_venda as 'Ordem Venda'
+		,tpd.nome as Transportadora
+        ,pv.transporte as 'Tipo Transporte'
+        ,grupo.nome as Grupo
+        ,pv.volume as Volume
+        ,ROUND(pv.valor_mercadoria,2) as 'Valor Mercadoria (R$)'
+        ,ROUND(pv.frete,2) as 'Frete  (R$)'
+        ,ROUND(pv.seguro,2) as 'Seguro (R$)'
+        ,ROUND(pv.acrescimos,2) as 'Acrescimos (R$)'
+        ,ROUND(pv.peso_liquido,2) as 'Peso Liquido (Kg)'
+        ,ROUND(pv.peso_bruto,2) as 'Peso Bruto (Kg)'
+        ,pv.emitido_em as 'Emitido em'
+        ,pv.previsao_entrega as 'Previsao Entrega'
+        ,pv.dt_embarque as 'Data Embarque'
+        ,pv.dt_entregue as 'Data Entregue'
+        ,pv.ontime as 'On Time'
+        ,pv.infull as 'In Full'
+        ,pv.ontime_infull as 'On Time/In Full'
+		,mun.municipio as Municipio
+        ,uf.uf as UF
+        ,uf.regiao as Regiao
+    FROM
+		pedidovenda pv
+	LEFT JOIN cliente cli
+		ON pv.cliente_numero = cli.cliente_numero
+	LEFT JOIN operacao opr
+		ON pv.Operacao_numero = opr.Operacao_numero
+	LEFT JOIN uso
+		ON pv.Uso_numero = uso.uso_Numero
+	LEFT JOIN transportadora tpd 
+		ON pv.transportadora_numero = tpd.transportadora_numero
+	LEFT JOIN endereco edc
+		ON pv.Cod_log_entrega = edc.Cod_log
+	LEFT JOIN grupo
+		ON tpd.Grupo_numero = grupo.Grupo_numero
+	LEFT JOIN municipio mun
+		ON edc.Municipio_numero = mun.Municipio_numero
+	LEFT JOIN uf 
+		ON mun.uf = uf.uf
+	LEFT JOIN pedidovendaitem pvi
+		ON pv.serie = pvi.serie AND pv.pedido_numero = pvi.pedido_numero
+	LEFT JOIN produto prd
+		ON pvi.produto_numero = prd.produto_numero
+	LEFT JOIN familia fam
+		ON prd.familia_numero = fam.familia_numero
+	LEFT JOIN linha
+		ON prd.linha_numero = linha.linha_numero
+	Order by cli.cliente,pv.emitido_em;
+    
+describe info_gerais;
