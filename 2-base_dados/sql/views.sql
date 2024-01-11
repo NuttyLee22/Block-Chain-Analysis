@@ -1,9 +1,12 @@
 use polimero;
 
+select * from log;
+
 -- 1-Tempo de entrega: Tempo decorrido da saída do armazém até a chegada no cliente em dias
 ALTER VIEW tempo_entrega AS
 	SELECT
-		opr.Nome as Operacao
+		pv.pedido_numero as 'Pedido Numero'
+        ,opr.Nome as Operacao
         ,uso.uso as Uso
 		,tpd.nome as Transportadora
         ,grupo.nome as Grupo
@@ -14,6 +17,7 @@ ALTER VIEW tempo_entrega AS
         ,pv.dt_embarque as 'Data Embarque'
         ,pv.dt_entregue as 'Data Entregue'
         ,CONCAT(CONVERT((pv.dt_entregue-pv.dt_embarque),CHAR)," dia(s)") as 'Tempo Entrega'
+        ,pv.dt_entregue-pv.dt_embarque as 'Dias' -- converter para numero inteiro
     FROM
 		pedidovenda pv
 	LEFT JOIN operacao opr
@@ -35,7 +39,8 @@ ALTER VIEW tempo_entrega AS
 -- 2-Tempo de ciclo do pedido: Tempo decorrido desde a  efetivação da compra até a entrega em dias
 ALTER VIEW tempo_ciclo_pedido AS
 	SELECT
-		opr.Nome as Operacao
+		pv.pedido_numero as 'Pedido Numero'
+        ,opr.Nome as Operacao
         ,uso.uso as Uso
 		,tpd.nome as Transportadora
         ,grupo.nome as Grupo
@@ -67,7 +72,8 @@ ALTER VIEW tempo_ciclo_pedido AS
 -- 3-On Time In Full (OTIF - Pedidos Completos e no Prazo): Número de pedidos recebidos pelo cliente no prazo e quantidades acordadas / número total de pedidos, em porcentagem.
 ALTER VIEW otif AS
 	SELECT
-		clt.cliente as 'Cliente'
+		pv.pedido_numero as 'Pedido Numero'
+        ,clt.cliente as 'Cliente'
 		,count(pv.pedido_numero) as 'Pedidos Recebidos'
         ,ROUND((count(pv.pedido_numero)*100)/totalPed.total_pedidos,2) as 'Pedidos Recebidos %'
 		,totalPed.total_pedidos as 'Total Pedidos'
@@ -91,14 +97,15 @@ ALTER VIEW otif AS
 	LEFT JOIN pedidovendaitem pvi
 		ON pv.serie = pvi.serie AND pv.pedido_numero = pvi.pedido_numero
 	WHERE pv.dt_entregue <= pv.previsao_entrega
-		AND pv.OnTime_InFull = 0
-	GROUP BY clt.cliente, totalPed.total_pedidos
+		AND pv.OnTime_InFull = 1
+	GROUP BY pv.pedido_numero, clt.cliente, totalPed.total_pedidos
     ORDER BY clt.cliente;
 
 -- 4-On time delivery (OTD): Número de pedidos entregues ao cliente no prazo acordado / número total de pedidos, em porcentagem.
-CREATE VIEW otd AS
+ALTER VIEW otd AS
 	SELECT
-		clt.cliente as 'Cliente'
+		DISTINCT(pv.pedido_numero) as 'Pedido Numero'
+        ,clt.cliente as 'Cliente'
 		,count(pv.pedido_numero) as 'Pedidos Recebidos'
         ,ROUND((count(pv.pedido_numero)*100)/totalPed.total_pedidos,2) as 'Pedidos Recebidos %'
 		,totalPed.total_pedidos as 'Total Pedidos'
@@ -122,12 +129,11 @@ CREATE VIEW otd AS
 	LEFT JOIN pedidovendaitem pvi
 		ON pv.serie = pvi.serie AND pv.pedido_numero = pvi.pedido_numero
 	WHERE pv.dt_entregue <= pv.previsao_entrega
-		-- AND pv.OnTime_InFull = 0
-	GROUP BY clt.cliente, totalPed.total_pedidos
+	GROUP BY pv.pedido_numero, clt.cliente, totalPed.total_pedidos
     ORDER BY clt.cliente;
 
 -- 5-Order Fill Rate:  Número de pedidos atendidos completamente / Número total de pedidos, em porcentagem 
-CREATE VIEW order_fill_rate AS
+ALTER VIEW order_fill_rate AS
 	SELECT
 		Cliente
         ,Pedidos_Recebidos
@@ -158,17 +164,19 @@ CREATE VIEW order_fill_rate AS
 			ON clt.cliente_numero = totalPed.NumeroCliente
 		LEFT JOIN pedidovendaitem pvi
 			ON pv.serie = pvi.serie AND pv.pedido_numero = pvi.pedido_numero
-		WHERE pv.dt_entregue <= pv.previsao_entrega
-			AND pv.OnTime_InFull = 0
+		WHERE pv.InFull = 1
 		GROUP BY clt.cliente, totalPed.total_pedidos
 		ORDER BY clt.cliente) as result
 	WHERE
 		Pedidos_Recebidos = TotalPedidos;
+
+select * from ofr_sep_exp;
         
 -- Order Fill Rate (OFR): o tempo gasto no processamento interno de um pedido de compra, desde a separação até a expedição.
 ALTER VIEW ofr_sep_exp AS 
 	SELECT
-		opr.Nome as Operacao
+		pv.pedido_numero as 'Pedido Numero'
+		,opr.Nome as Operacao
         ,uso.uso as Uso
 		,tpd.nome as Transportadora
         ,grupo.nome as Grupo
@@ -198,7 +206,8 @@ ALTER VIEW ofr_sep_exp AS
 -- Ticket médio por pedido: valor total das vendas dividido pelo numero de pedidos atendidos
 ALTER VIEW ticket_medio_pedido AS
 	SELECT
-		opr.Nome as Operacao
+		pv.pedido_numero as 'Pedido Numero'
+        ,opr.Nome as Operacao
         ,uso.uso as Uso
 		,tpd.nome as Transportadora
         ,grupo.nome as Grupo
@@ -250,7 +259,8 @@ ALTER VIEW ticket_medio_pedido AS
 	LEFT JOIN uf 
 		ON mun.uf = uf.uf
 	GROUP BY
-		opr.Nome
+		pv.pedido_numero
+        ,opr.Nome
         ,uso.uso
 		,tpd.nome
         ,grupo.nome
