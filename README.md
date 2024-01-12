@@ -48,9 +48,8 @@ Antes de executar o projeto, as seguintes ferramentas devem estar instaladas:
 - Jupyer Notebook
 
 ## Instruções de Uso
+De maneira simples, basta clonar o repositório na sua máquina, no diretório de preferência. Não esqueçaa de iniciar o git localmente.
 
 1. Clone este repositório: `git clone https://github.com/seu-usuario/seu-repositorio.git`
-2. Navegue até o diretório do projeto: `cd seu-repositorio`
-3. Execute o script de inicialização: `./start.sh`
 
 Lembre-se de consultar a documentação específica de cada ferramenta para configurações adicionais.
