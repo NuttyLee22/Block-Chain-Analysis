@@ -328,4 +328,4 @@ ALTER VIEW info_gerais AS
 		ON prd.linha_numero = linha.linha_numero
 	Order by cli.cliente,pv.emitido_em;
     
-describe info_gerais;
+describe pedidovendaitem;
