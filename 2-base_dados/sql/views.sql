@@ -51,6 +51,7 @@ ALTER VIEW tempo_ciclo_pedido AS
         ,pv.dt_embarque as 'Data Embarque'
         ,pv.dt_entregue as 'Data Entregue'
         ,CONCAT(CONVERT((pv.dt_entregue-pv.emitido_em),CHAR)," dia(s)") as 'Ciclo Pedido'
+        ,pv.dt_entregue-pv.emitido_em as 'Dias'
     FROM
 		pedidovenda pv
 	LEFT JOIN operacao opr
@@ -169,6 +170,7 @@ ALTER VIEW order_fill_rate AS
 		ORDER BY clt.cliente) as result
 	WHERE
 		Pedidos_Recebidos = TotalPedidos;
+	-- arrumar view
 
 select * from ofr_sep_exp;
         
