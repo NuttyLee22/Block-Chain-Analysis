@@ -6,6 +6,4 @@
 
 5-Order Fill Rate:  Número de pedidos atendidos completamente / Número total de pedidos, em porcentagem 
 
--- gráficos de pizza parecido com do modelo de exemplo
--- grafico de mapa confundi estado MT com ilha da Italia. Criar nova coluna identificando Brasil
-	Nao identifica os municipios
+-- Arrumar linkagem entre os graficos do Dash de KPIs - Power BI

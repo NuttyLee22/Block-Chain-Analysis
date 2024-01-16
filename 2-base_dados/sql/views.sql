@@ -16,8 +16,8 @@ ALTER VIEW tempo_entrega AS
         ,pv.previsao_entrega as 'Previsao Entrega'
         ,pv.dt_embarque as 'Data Embarque'
         ,pv.dt_entregue as 'Data Entregue'
-        ,CONCAT(CONVERT((pv.dt_entregue-pv.dt_embarque),CHAR)," dia(s)") as 'Tempo Entrega'
-        ,pv.dt_entregue-pv.dt_embarque as 'Dias' -- converter para numero inteiro
+        ,CONCAT(CONVERT(DATEDIFF(pv.dt_entregue,pv.dt_embarque),CHAR)," dia(s)") as 'Tempo Entrega'
+        ,DATEDIFF(pv.dt_entregue,pv.dt_embarque) as 'Dias' -- converter para numero inteiro
     FROM
 		pedidovenda pv
 	LEFT JOIN operacao opr
@@ -50,8 +50,8 @@ ALTER VIEW tempo_ciclo_pedido AS
         ,pv.previsao_entrega as 'Previsao Entrega'
         ,pv.dt_embarque as 'Data Embarque'
         ,pv.dt_entregue as 'Data Entregue'
-        ,CONCAT(CONVERT((pv.dt_entregue-pv.emitido_em),CHAR)," dia(s)") as 'Ciclo Pedido'
-        ,pv.dt_entregue-pv.emitido_em as 'Dias'
+        ,CONCAT(CONVERT(DATEDIFF(pv.dt_entregue,pv.emitido_em),CHAR)," dia(s)") as 'Ciclo Pedido'
+        ,DATEDIFF(pv.dt_entregue,pv.emitido_em) as 'Dias'
     FROM
 		pedidovenda pv
 	LEFT JOIN operacao opr
@@ -68,6 +68,7 @@ ALTER VIEW tempo_ciclo_pedido AS
 		ON edc.Municipio_numero = mun.Municipio_numero
 	LEFT JOIN uf 
 		ON mun.uf = uf.uf
+	Where pv.dt_entregue-pv.emitido_em > 10
 	Order by pv.emitido_em;
     
 -- 3-On Time In Full (OTIF - Pedidos Completos e no Prazo): Número de pedidos recebidos pelo cliente no prazo e quantidades acordadas / número total de pedidos, em porcentagem.
@@ -105,8 +106,7 @@ ALTER VIEW otif AS
 -- 4-On time delivery (OTD): Número de pedidos entregues ao cliente no prazo acordado / número total de pedidos, em porcentagem.
 ALTER VIEW otd AS
 	SELECT
-		DISTINCT(pv.pedido_numero) as 'Pedido Numero'
-        ,clt.cliente as 'Cliente'
+        clt.cliente as 'Cliente'
 		,count(pv.pedido_numero) as 'Pedidos Recebidos'
         ,ROUND((count(pv.pedido_numero)*100)/totalPed.total_pedidos,2) as 'Pedidos Recebidos %'
 		,totalPed.total_pedidos as 'Total Pedidos'
@@ -130,47 +130,49 @@ ALTER VIEW otd AS
 	LEFT JOIN pedidovendaitem pvi
 		ON pv.serie = pvi.serie AND pv.pedido_numero = pvi.pedido_numero
 	WHERE pv.dt_entregue <= pv.previsao_entrega
-	GROUP BY pv.pedido_numero, clt.cliente, totalPed.total_pedidos
+	GROUP BY clt.cliente, totalPed.total_pedidos
     ORDER BY clt.cliente;
+    
+    select count(*) from otd;
 
 -- 5-Order Fill Rate:  Número de pedidos atendidos completamente / Número total de pedidos, em porcentagem 
-ALTER VIEW order_fill_rate AS
-	SELECT
-		Cliente
-        ,Pedidos_Recebidos
-        ,Pedidos_Recebidos_Porc
-        ,TotalPedidos
-    FROM
-		(SELECT
-			clt.cliente as 'Cliente'
-			,count(pv.pedido_numero) as Pedidos_Recebidos
-			,ROUND((count(pv.pedido_numero)*100)/totalPed.total_pedidos,2) as Pedidos_Recebidos_Porc
-			,totalPed.total_pedidos as TotalPedidos
-		FROM
-			pedidovenda pv
-		LEFT JOIN cliente clt
-			ON pv.cliente_numero = clt.cliente_numero
-		LEFT JOIN 
-			(SELECT
-					clt.cliente_numero as NumeroCliente
-					,clt.cliente as Cliente
-					,count(pv.pedido_numero) as total_pedidos
-				FROM
-					pedidovenda pv
-				LEFT JOIN cliente clt
-					ON pv.cliente_numero = clt.cliente_numero
-				LEFT JOIN pedidovendaitem pvi
-					ON pv.serie = pvi.serie AND pv.pedido_numero = pvi.pedido_numero
-				GROUP BY clt.cliente_numero, clt.cliente) as totalPed 
-			ON clt.cliente_numero = totalPed.NumeroCliente
-		LEFT JOIN pedidovendaitem pvi
-			ON pv.serie = pvi.serie AND pv.pedido_numero = pvi.pedido_numero
-		WHERE pv.InFull = 1
-		GROUP BY clt.cliente, totalPed.total_pedidos
-		ORDER BY clt.cliente) as result
-	WHERE
-		Pedidos_Recebidos = TotalPedidos;
-	-- arrumar view
+-- CORRECA0 :
+
+ALTER VIEW OrderFillRateView AS
+SELECT
+    pv.Serie,
+    pv.Pedido_numero,
+    pv.Cliente_numero,
+    clt.Cliente,
+    pv.Operacao_numero,
+    pv.Uso_numero,
+    pv.Transportadora_numero,
+    pv.Cod_log_entrega,
+	pv.OnTime,
+    pv.InFull,
+    pv.OnTime_InFull,
+    pvi.Serie AS Item_Serie,
+    pvi.Pedido_numero AS Item_Pedido_numero,
+    pvi.Produto_numero
+FROM
+    polimero.PedidoVenda pv
+JOIN polimero.PedidoVendaItem pvi 
+	ON pv.Serie = pvi.Serie AND pv.Pedido_numero = pvi.Pedido_numero
+LEFT JOIN cliente clt
+	ON pv.cliente_numero = clt.cliente_numero;
+    
+ALTER VIEW OrderFillRateResult AS
+SELECT
+    Cliente_numero,
+    Cliente,
+    COUNT(DISTINCT Pedido_numero) AS Total_Pedidos,
+    COUNT(DISTINCT CASE WHEN OnTime_InFull = 1 THEN Pedido_numero END) AS Pedidos_Atendidos_Completamente,
+    (COUNT(DISTINCT CASE WHEN OnTime_InFull = 1 THEN Pedido_numero END) / COUNT(DISTINCT Pedido_numero)) * 100 AS Order_Fill_Rate
+FROM
+    OrderFillRateView
+    
+GROUP BY
+    Cliente_numero, Cliente;
 
 select * from ofr_sep_exp;
         
@@ -228,7 +230,7 @@ ALTER VIEW ticket_medio_pedido AS
 			WHEN 10 THEN 'Outubro'
 			WHEN 11 THEN 'Novembro'
 			WHEN 12 THEN 'Dezembro' END as Mes_Entregue
-        -- ,pvi.preco_total as 'Valor Total Venda'	
+		,pv.dt_entregue as 'Data Entregue'	
         ,ROUND(SUM(pvi.preco_total/total_ped_atendidos.Pedido),2) as 'Ticket Medio por Pedido'
     FROM
 		pedidovenda pv
@@ -268,7 +270,8 @@ ALTER VIEW ticket_medio_pedido AS
         ,grupo.nome
         ,mun.municipio
         ,uf.uf
-        ,Mes_Entregue;
+        ,Mes_Entregue
+        ,pv.dt_entregue;
 	-- ORDER BY MONTH(Mes_Entregue);
 
 -- Info gerais : Para PowerBI e analises notebook
@@ -300,8 +303,12 @@ ALTER VIEW info_gerais AS
         ,pv.infull as 'In Full'
         ,pv.ontime_infull as 'On Time/In Full'
 		,mun.municipio as Municipio
-        ,uf.uf as UF
+        ,CASE WHEN (uf.uf) = 'SP' THEN 'São Paulo'
+			  WHEN (uf.uf) = 'RJ' THEN 'Rio de Janeiro'
+              WHEN (uf.uf) = 'MT' THEN 'Mato Grosso'
+         END AS UF
         ,uf.regiao as Regiao
+        ,'BR' as Pais
     FROM
 		pedidovenda pv
 	LEFT JOIN cliente cli
