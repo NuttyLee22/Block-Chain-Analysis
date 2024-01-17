@@ -343,7 +343,7 @@ describe pedidovendaitem;
 
 -- Criar uma view que une os resultados de todas as outras views
 
-CREATE VIEW KPIs AS
+ALTER VIEW KPIs AS
 SELECT
     -- Campos da view tempo_entrega
     te.`Pedido Numero`,
@@ -361,50 +361,24 @@ SELECT
     te.Dias AS `Tempo Entrega Dias`,
 
     -- Campos da view tempo_ciclo_pedido
-    tcp.`Pedido Numero` AS `Pedido Numero Ciclo`,
-    tcp.Operacao AS `Operacao Ciclo`,
-    tcp.Uso AS `Uso Ciclo`,
-    tcp.Transportadora AS `Transportadora Ciclo`,
-    tcp.Grupo AS `Grupo Ciclo`,
-    tcp.Municipio AS `Municipio Ciclo`,
-    tcp.UF AS `UF Ciclo`,
-    tcp.`Emitido em` AS `Emitido em Ciclo`,
-    tcp.`Previsao Entrega` AS `Previsao Entrega Ciclo`,
-    tcp.`Data Embarque` AS `Data Embarque Ciclo`,
-    tcp.`Data Entregue` AS `Data Entregue Ciclo`,
     tcp.`Ciclo Pedido`,
     tcp.Dias AS `Ciclo Pedido Dias`,
 
     -- Campos da view otif
-    o.`Pedido Numero` AS `Pedido Numero OTIF`,
     o.Cliente,
     o.`Pedidos Recebidos` AS `Pedidos Recebidos OTIF`,
     o.`Pedidos Recebidos %` AS `Pedidos Recebidos % OTIF`,
-    o.`Total Pedidos` AS `Total Pedidos OTIF`,
+	o.`Total Pedidos` AS `Total Pedidos OTIF`,
 
     -- Campos da view otd
-    ot.Cliente AS `Cliente OTD`,
     ot.`Pedidos Recebidos` AS `Pedidos Recebidos OTD`,
     ot.`Pedidos Recebidos %` AS `Pedidos Recebidos % OTD`,
     ot.`Total Pedidos` AS `Total Pedidos OTD`,
 
     -- Campos da view OrderFillRateResult
-    ofr.Cliente AS `Cliente OFR`,
     ofr.`Total_Pedidos` AS `Total Pedidos OFR`,
     ofr.`Pedidos_Atendidos_Completamente` AS `Pedidos Atendidos Completamente OFR`,
-    ofr.`Order_Fill_Rate` AS `Order Fill Rate OFR`,
-
-    -- Campos da view ofr_sep_exp
-    ofrse.`Pedido Numero` AS `Pedido Numero OFR`,
-    ofrse.Operacao AS `Operacao OFR`,
-    ofrse.Uso AS `Uso OFR`,
-    ofrse.Transportadora AS `Transportadora OFR`,
-    ofrse.Grupo AS `Grupo OFR`,
-    ofrse.Municipio AS `Municipio OFR`,
-    ofrse.UF AS `UF OFR`,
-    ofrse.`Emitido em` AS `Emitido em OFR`,
-    ofrse.`Data Embarque` AS `Data Embarque OFR`,
-    ofrse.`Tempo Processamento` AS `Tempo Processamento OFR`
+    ofr.`Order_Fill_Rate` AS `Order Fill Rate OFR`
 
 FROM
     tempo_entrega te
@@ -418,3 +392,5 @@ JOIN OrderFillRateResult ofr
 	ON o.Cliente = ofr.Cliente
 JOIN ofr_sep_exp ofrse 
 	ON te.`Pedido Numero` = ofrse.`Pedido Numero`;
+
+select count(*) from kpis;
